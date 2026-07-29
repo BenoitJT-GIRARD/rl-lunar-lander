@@ -17,15 +17,13 @@ The repository delivers a full project to practice training RL agents:
 - an interactive Streamlit performance dashboard with multiple filters,
 - a 20-30 s `.mp4` of a successful landing.
 
-A full walk-through is provided in `notebooks/lunar_lander.ipynb` and
-the design notes are in `docs/`.
+A full walk-through is provided in `notebooks/lunar_lander.ipynb`.
 
 ## Repository layout
 
 ```
 rl_lander/
 ├── data/                    # CSV exports consumed by the dashboard
-├── docs/                    # design notes
 ├── logs/                    # TensorBoard runs (gitignored)
 ├── models/                  # Saved checkpoints (best PPO / baseline DQN)
 ├── notebooks/
@@ -71,6 +69,7 @@ uv run uvicorn rl_lander.api:app --reload
 # 6. Launch the GUI / dashboard (point the GUI at the API URL)
 uv run streamlit run src/rl_lander/gui.py
 uv run streamlit run src/rl_lander/dashboard.py
+uv run tensorboard --logdir logs/tensorboard
 ```
 
 ## Reproducibility
