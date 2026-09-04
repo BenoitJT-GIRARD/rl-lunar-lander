@@ -235,7 +235,7 @@ def train_dqn(
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="LunarLander LunarLander training")
+    parser = argparse.ArgumentParser(description="LunarLander training")
     parser.add_argument("--algo", choices=["ppo", "dqn"], default="ppo")
     parser.add_argument("--timesteps", type=int, default=None)
     parser.add_argument("--seed", type=int, default=42)

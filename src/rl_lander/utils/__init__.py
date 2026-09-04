@@ -1,4 +1,4 @@
-"""Utility helpers shared across the package."""
+"""Paths and seeding, shared across the package."""
 
 from rl_lander.utils.paths import (
     DATA_DIR,

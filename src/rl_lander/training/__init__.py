@@ -1,4 +1,4 @@
-"""Training pipeline for the LunarLander study (LunarLander-v3)."""
+"""Training pipeline for the mission (LunarLander-v3)."""
 
 from rl_lander.training.environments import (
     LUNAR_LANDER_ID,

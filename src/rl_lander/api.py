@@ -1,4 +1,4 @@
-"""FastAPI service exposing the trained LunarLander autopilot.
+"""FastAPI service exposing the trained autopilot.
 
 Endpoints
 ---------
