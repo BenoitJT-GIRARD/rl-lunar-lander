@@ -15,6 +15,12 @@ import os
 import socket
 from pathlib import Path
 
+# pandas loads pyarrow as it imports, when the `ui` extra has installed it, and pyarrow's
+# native libraries fault on Windows when they load after Box2D's. Every tier imports
+# gymnasium below, at collection: pandas goes first.
+import pandas  # noqa: F401
+
+# isort: split
 import gymnasium as gym
 import pytest
 from stable_baselines3 import PPO
