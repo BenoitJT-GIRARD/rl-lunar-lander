@@ -22,7 +22,10 @@ dependencies = [
     "Box2D>=2.3.10",
     "pygame>=2.5",
     "stable-baselines3==2.4.0",
-    "torch>=2.4,<2.6",
+    # 2.13 is the first release past every torch advisory that has a fix; CUDA 12.4 builds
+    # stop well before it, hence the 12.6 index below. 2.14.1 is left out: on Windows its
+    # CUDA build crashes inside a training process.
+    "torch>=2.13,<2.14",
     "numpy>=1.26,<2.2",
     # Data / plotting
     "pandas>=2.2",
@@ -36,11 +39,9 @@ dependencies = [
     "imageio>=2.36",
     "imageio-ffmpeg>=0.5",
     # Utilities
-    "tensorboard>=2.18",
-    # TensorBoard still imports `pkg_resources`, which uv does not seed into the
-    # virtualenv the way pip-created venvs do. Cap below setuptools 81, which
-    # removed `pkg_resources` altogether.
-    "setuptools>=70,<81",
+    # 2.21 no longer imports `pkg_resources`; 2.20 did, which held setuptools below 81 and
+    # below the release that fixes its advisory.
+    "tensorboard>=2.21",
 ]
 
 [project.optional-dependencies]
@@ -57,6 +58,8 @@ ui = [
 dev = [
     "pytest>=8.3",
     "pytest-cov>=6.0",
+    # The test client of starlette 1.x is built on httpx2, and warns if only httpx is there.
+    "httpx2>=2.13.1",
     "ruff>=0.7",
     "bandit[toml]>=1.7",
     "pre-commit>=4.0",
@@ -80,8 +83,8 @@ build-backend = "hatchling.build"
 # of time and cannot probe the hardware. On a Linux box with a GPU, swap the two indexes.
 [tool.uv]
 [[tool.uv.index]]
-name = "pytorch-cu124"
-url = "https://download.pytorch.org/whl/cu124"
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
 explicit = true
 
 [[tool.uv.index]]
@@ -91,7 +94,7 @@ explicit = true
 
 [tool.uv.sources]
 torch = [
-    { index = "pytorch-cu124", marker = "sys_platform == 'win32'" },
+    { index = "pytorch-cu126", marker = "sys_platform == 'win32'" },
     { index = "pytorch-cpu", marker = "sys_platform != 'win32'" },
 ]
 
@@ -160,8 +163,6 @@ filterwarnings = [
     # unwinds through C and takes the interpreter down with it, so it cannot be an error.
     "ignore:builtin type Swig.* has no __module__ attribute:DeprecationWarning",
     "ignore:builtin type swigvarlink has no __module__ attribute:DeprecationWarning",
-    # pygame still imports pkg_resources at module load; nothing here can avoid it.
-    "ignore:pkg_resources is deprecated as an API:UserWarning",
 ]
 
 [tool.coverage.run]
