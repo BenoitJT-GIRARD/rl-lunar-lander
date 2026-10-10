@@ -1,18 +1,18 @@
 {
   "command": "uv run python scripts/smoke.py",
-  "ran_at": "2026-09-15",
-  "git_revision": "ab65633df236968f334943e77edac0deb25b8944",
+  "ran_at": "2026-10-10",
+  "git_revision": "b843ec23a1bb8d114cba38994627b46970aee5b9",
   "tool_versions": {
     "python": "3.12.12",
     "gymnasium": "1.0.0",
     "stable-baselines3": "2.4.0",
-    "torch": "2.5.1+cu124",
+    "torch": "2.13.0+cu126",
     "numpy": "1.26.4",
     "Box2D": "2.3.10",
     "uv": "uv 0.11.6 (65950801c 2026-04-09 x86_64-pc-windows-msvc)",
     "docker": "Docker version 29.2.0, build 0b9d198"
   },
-  "duration_seconds": 36.9,
+  "duration_seconds": 43.1,
   "key_output": [
     "reports/evaluation_episodes.csv",
     "reports/evaluation_summary.json"
