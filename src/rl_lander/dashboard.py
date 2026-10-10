@@ -172,8 +172,11 @@ def _engine_section(frame: pd.DataFrame) -> None:
     # 10 / 30 / 60 put every episode of this run in the last bucket, which is a chart that
     # cannot say anything.
     buckets = pd.qcut(total, q=4, duplicates="drop")
+    # The intervals are named rather than cast: casting the categorical to `str` warns about an
+    # invalid value on Linux with pandas 3, and renaming keeps the buckets in ascending order.
+    labels = buckets.cat.rename_categories([str(interval) for interval in buckets.cat.categories])
     breakdown = (
-        frame.assign(bucket=buckets.astype(str))
+        frame.assign(bucket=labels)
         .groupby("bucket", observed=True)["total_reward"]
         .agg(["mean", "count"])
         .reset_index()
