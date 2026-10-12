@@ -41,7 +41,7 @@ Pydantic models, so the documentation page below is generated from what the serv
 validates against.
 
 <!-- source: docs/images/MANIFEST.json -->
-![The service answering on localhost, its documentation page showing the two meta routes and the four that reach the policy](docs/images/api-docs.png)
+![The service answering on localhost, its documentation page showing the three meta routes and the three agent routes](docs/images/api-docs.png)
 
 `/health` and `/ready` are separate on purpose: one means restart the process, the other means
 stop sending it traffic. `docs/architecture.md` gives the failure that follows from merging
@@ -388,7 +388,7 @@ exercises included.
 │   ├── architecture.md           # why a service, and where the boundaries are
 │   ├── data-source.md            # the environment, the seeds, and what they fix
 │   ├── protocol.md               # the three dispersions, and which is which
-│   ├── operations.md             # the five routes, and what to look at when one stops
+│   ├── operations.md             # the six routes, and what to look at when one stops
 │   └── interface.md              # the cockpit and the dashboard
 ├── models/ppo/best.zip           # the shipped policy; the runs live under var/, untracked
 ├── notebooks/lunar_lander.ipynb  # the work in order

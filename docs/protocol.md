@@ -102,5 +102,5 @@ across-grid table is where that shows: the mean moves by a point, the worst epis
 from 123 to 227.
 
 **A ranking between PPO and DQN.** One DQN run against five PPO runs answers « is DQN
-competitive here », not « which is better ». `docs/architecture.md` says why the comparison
-is run at an equal budget rather than at each algorithm's own defaults.
+competitive here », not « which is better ». The header of `scripts/train_study.py` says why the
+comparison is run at an equal budget rather than at each algorithm's own defaults.

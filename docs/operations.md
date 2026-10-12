@@ -85,10 +85,10 @@ Everything else is a few milliseconds.
 
 ## What is not here
 
-**No container, no queue, no worker.** `docs/architecture.md` gives the reasoning and the size
-of the load that would change it.
+**No container orchestration, no queue, no worker.** `docs/architecture.md` gives the reasoning
+and the size of the load that would change it.
 
-**No authentication.** Five read-only routes serve a policy committed in the open, so a
+**No authentication.** Six read-only routes serve a policy committed in the open, so a
 key would protect nothing and would be one more thing to leak.
 
 **Nothing watches it.** There is no metrics endpoint, no tracing and no alerting. The service

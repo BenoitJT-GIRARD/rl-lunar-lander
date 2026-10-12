@@ -74,7 +74,8 @@ simulator. None of it contains anything anyone else owns.
 
 `models/ppo/best.zip` is a Stable-Baselines3 checkpoint: weights this repository trained, from
 an architecture the library provides. The per-run directories live under `var/runs/` and are
-not tracked: each holds 148 KB of weights that the seed and the code can reproduce.
+not tracked: each holds 148 KB of weights, which the seed and the code reproduce closely but not
+exactly.
 
 ## What « generated locally » is worth
 

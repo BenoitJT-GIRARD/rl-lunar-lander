@@ -5,7 +5,7 @@ Read this page after the README and before the code.
 ## The shape
 
 ```
-                 models/ppo/best.zip          data/*.csv, data/*.json
+                 models/ppo/best.zip          reports/*.csv
                           │                             │
                           ▼                             ▼
    ┌──────────────┐   ┌────────────────┐        ┌──────────────────┐
@@ -52,7 +52,7 @@ what a mismatch means, and the cockpit turns red when they differ.
 
 ## Why the dashboard reads files rather than the API
 
-The dashboard describes a *published evaluation*. Its inputs are the artefacts under `data/`
+The dashboard describes a *published evaluation*. Its inputs are the artefacts under `reports/`
 that `scripts/evaluate_and_export.py` writes, and those are versioned. Re-running the
 evaluation on every page load would show a different number each time, none of them the one
 the README quotes.

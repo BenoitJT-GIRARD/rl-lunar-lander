@@ -54,7 +54,7 @@ tracked, and it recomputes nothing.
 and not the integer the environment returns, because Plotly reads an integer as continuous and
 paints a gradient over two values.
 
-**A reference is dashed.** On the scatter of resting positions, the band that counts as on
+**A reference is dotted.** On the scatter of resting positions, the band that counts as on
 target is drawn in the palette's reserved colour with a dotted line, which still
 distinguishes it when the colours are gone.
 
