@@ -1,8 +1,8 @@
 # Running the service
 
-Start it, ask it something, and know what to look at when it stops answering.
-`docs/architecture.md` argues why the inference sits behind a service; this page is the
-operating manual.
+This is the operating manual: how to start the service, how to query it, and what to look at
+when it stops answering. The case for putting the inference behind a service is made in
+`docs/architecture.md`.
 
 ## Starting it
 
@@ -23,7 +23,7 @@ the application's `lifespan`.
 | `PYTHONHASHSEED` | unset | string hashing, for a result that must cross machines |
 
 `.env.example` carries the same list, with what each one is for. There is no secret: no key,
-no database, no third-party call. **Nothing loads a `.env` on its own.** Pass it to the
+no database, no third-party call. Nothing loads a `.env` on its own: pass it to the
 command that needs it, `uv run --env-file .env uvicorn rl_lander.api:app`, so that what the
 process reads is visible in what was typed.
 
@@ -68,8 +68,7 @@ about all of them.
 | `/reset` | POST | a starting observation for a given seed |
 
 The page above is generated from the Pydantic models, so what a caller reads is what the
-service enforces. Why the first two are separate routes rather than one is in
-`docs/architecture.md`.
+service enforces. `docs/architecture.md` explains why the first two are separate routes.
 
 `POST /run` is the slow one: it simulates up to a thousand environment steps before it answers.
 Everything else is a few milliseconds.
@@ -89,8 +88,8 @@ Everything else is a few milliseconds.
 **No container, no queue, no worker.** `docs/architecture.md` gives the reasoning and the size
 of the load that would change it.
 
-**No authentication.** Five read-only routes over a policy committed in the open. A key would
-protect nothing and would be one more thing to leak.
+**No authentication.** Five read-only routes serve a policy committed in the open, so a
+key would protect nothing and would be one more thing to leak.
 
-**Nothing watches it.** No metrics endpoint, no traces, no alerting. The service is started by
-hand, for a demonstration or for the cockpit, and it is stopped the same way.
+**Nothing watches it.** There is no metrics endpoint, no tracing and no alerting. The service
+is started by hand, for a demonstration or for the cockpit, and it is stopped the same way.

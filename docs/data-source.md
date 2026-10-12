@@ -31,8 +31,8 @@ come to rest on a pad between two flags. Fuel is not modelled; firing an engine 
 
 The four actions are: do nothing, fire the left engine, fire the main engine, fire the right
 engine. `src/rl_lander/api.py` refuses an observation outside the box the environment itself
-declares, because a policy is a function and will answer anything — an altitude of 900 returns
-an action that means nothing.
+declares, because a policy is a function and will answer anything: given an altitude of 900,
+it returns an action that means nothing.
 
 ## What a seed does, and what it does not
 
@@ -41,7 +41,7 @@ runs with the same seed, the same policy and the same package versions produce t
 trajectory, and `tests/system/test_service_end_to_end.py` asks the running service for the
 same episode twice and compares the action sequences.
 
-What a seed does **not** fix is the training. `set_global_seed` seeds Python, NumPy and torch,
+A seed does not fix the training. `set_global_seed` seeds Python, NumPy and torch,
 and says so in its docstring; it cannot seed cuDNN's non-deterministic kernels or the order in
 which a vectorised environment returns. Two trainings at seed 42 land close together and not
 identically, which is one of the reasons the study reports a spread between runs rather than a
@@ -53,8 +53,8 @@ An evaluation grid is a seed and a count: 100 consecutive episodes from `env.res
 `seed=g+1`, and so on. Six grids are used, `2024, 7, 99, 123, 555, 31337`, and the first is
 the one whose episodes are exported row by row.
 
-The grids were fixed in code before the policy was scored. That is the point of naming them
-here: a grid chosen after the numbers are in is not a measurement, and the exported grid turns
+The grids were fixed in code before the policy was scored, and they are named here for that
+reason: a grid chosen after the numbers are in is not a measurement. The exported grid turns
 out to be the *least* flattering of the six.
 
 ## What is published, and what it contains
@@ -74,16 +74,16 @@ simulator. None of it contains anything anyone else owns.
 
 `models/ppo/best.zip` is a Stable-Baselines3 checkpoint: weights this repository trained, from
 an architecture the library provides. The per-run directories live under `var/runs/` and are
-not tracked, being 148 KB of weights each and reproducible from the seed and the code.
+not tracked: each holds 148 KB of weights that the seed and the code can reproduce.
 
 ## What « generated locally » is worth
 
-It removes the question of redistribution, and it does not remove the question of
-reproducibility. A reader who reruns `scripts/train_study.py` will not get these exact
-weights: the training is seeded but not deterministic, for the reasons above. What they will
-get is a policy whose score falls inside the published between-runs spread, which is precisely
-the claim `docs/protocol.md` is built to make.
+It settles the question of redistribution and leaves the question of reproducibility open. A
+reader who reruns `scripts/train_study.py` will not get these exact weights: the training is
+seeded but not deterministic, for the reasons above. They will get a policy whose score falls
+inside the published between-runs spread, which is the claim `docs/protocol.md` is built to
+make.
 
-The manifest is what makes the published scores checkable without retraining anything: it
+The manifest makes the published scores checkable without retraining anything: it
 names the checkpoint, the six grids and the versions, and `scripts/evaluate_and_export.py`
 rescores that checkpoint in about a minute.

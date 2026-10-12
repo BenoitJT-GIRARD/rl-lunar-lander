@@ -1,12 +1,11 @@
 # The evaluation protocol
 
-What each published number is a claim about, how it was measured, and what the `±` beside it
-covers. `metrics.yaml` defines every label a table uses; this page says how the tables were
-obtained.
+This page says what each published number is a claim about, how it was measured, and what
+the `±` beside it covers. `metrics.yaml` defines every label a table uses, and the sections
+that follow say how the tables were obtained.
 
-Three things move a reinforcement-learning score, and a report that fixes two of them and
-varies the third silently is a report about nothing. Everything below exists to say which of
-the three a given `±` describes.
+Three things move a reinforcement-learning score. A report that fixes two of them and lets the
+third vary without saying so cannot tell its reader what its `±` describes.
 
 ## What is fixed, and what varies
 
@@ -23,7 +22,7 @@ versions and the git revision the scores were taken at.
 
 ## The three dispersions, and which is which
 
-Every `±` in this repository is a **standard deviation**, computed over a population the
+Every `±` in this repository is a standard deviation, computed over a population the
 sentence beside it names. A column that disperses one thing on one row and another on the next
 teaches a reader to ignore it. Three populations appear here, and they are never mixed:
 
@@ -33,7 +32,7 @@ teaches a reader to ignore it. Three populations appear here, and they are never
 | `between runs` | the five training seeds, each already averaged | the headline score |
 | `across grids` | the six evaluation grids, one policy | the stability of the shipped policy |
 
-**The headline number is the second one.** It is the only one that answers « retrain this
+The headline number is the second one, the only one that answers « retrain this
 configuration and what do you get », which is the question a reader has. The first describes
 episodes and says nothing about the method; the earlier version of this repository published
 it as if it did.
@@ -51,10 +50,10 @@ it as if it did.
    scores were seen, and its docstring states the rule and the tie-break. It also refuses a
    run that never improved on its own starting point.
 5. `scripts/evaluate_and_export.py` re-scores the promoted policy on the six grids and
-   fails the command when one of them falls short. A published claim cannot outlive the run
-   behind it.
+   fails the command when one of them falls short, so a published claim stays tied to a run
+   that still supports it.
 
-What the five runs did on the way there, drawn from the band of step 3:
+The band from step 3 shows what the five runs did on the way there:
 
 <!-- source: reports/figures/MANIFEST.json -->
 ![Rolling episode reward against environment steps, the median of n = 5 runs drawn over the band from the 25th to the 75th percentile, with the solved threshold dashed above it](../reports/figures/learning_curve.png)
@@ -65,15 +64,15 @@ What the five runs did on the way there, drawn from the band of step 3:
 > The dashed line above is the score the environment calls solved. These are training episodes,
 > noisier by construction than the evaluation the published score comes from.
 
-The curve sits below the published score throughout, and the gap is not progress left on the
-table: these are training episodes, where actions are sampled from the policy's distribution,
-and the published number comes from a deterministic run of the same weights.
+The curve sits below the published score throughout, and the gap does not mean training
+stopped too early: these are training episodes, where actions are sampled from the policy's
+distribution, and the published number comes from a deterministic run of the same weights.
 
 ## What `landed` means
 
-The environment's terminal reward, and not the score. `LunarLander-v3` pays one hundred for
-coming to rest and takes one hundred for a crash or a departure from the frame, and that sign
-is what `landed` reads. The score is kept as a separate column.
+`landed` reads the environment's terminal reward, not the score. `LunarLander-v3` pays one
+hundred for coming to rest and takes one hundred for a crash or a departure from the frame, and
+the flag follows the sign of that reward. The score is kept as a separate column.
 
 The 200 Gymnasium calls solved describes the task over many episodes and settles nothing about
 one of them; the docstring of `rl_lander.api` makes the same point where it refuses an
@@ -88,8 +87,8 @@ same code. One seed is not enough to rank a parameter, and the table says so in 
 column: a difference smaller than the baseline's own spread between seeds is one draw from
 the same distribution.
 
-That column is the whole point of the table. Without it, the reader ranks four numbers and
-repeats, one level up, the error this repository exists to correct.
+Without that column, a reader would rank four numbers and repeat, one level up, the error this
+repository exists to correct.
 
 ## What this protocol does not give
 
@@ -98,7 +97,7 @@ seed matters and to publish a spread; they are not enough to bound that spread. 
 be the right number, and the conclusion does not change past five.
 
 **A worst-case guarantee.** One hundred episodes per grid pins the mean and says very little
-about the tail, which for a landing autopilot is the number that would actually matter. The
+about the tail, the part of the distribution that counts for a landing autopilot. The
 across-grid table is where that shows: the mean moves by a point, the worst episode moves
 from 123 to 227.
 

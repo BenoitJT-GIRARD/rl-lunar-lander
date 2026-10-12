@@ -1,8 +1,8 @@
 # The two pages
 
-A cockpit that flies one episode, and a dashboard that reads the published evaluation. Both
-are Streamlit, both are optional, and neither holds a line of reinforcement learning.
-`docs/architecture.md` argues why the boundary sits there; this page says what the two show
+The cockpit flies one episode and the dashboard reads the published evaluation. Both are
+optional Streamlit pages, and neither holds a line of reinforcement learning.
+`docs/architecture.md` argues why the boundary sits there; this page covers what the two show
 and the rules they follow on screen.
 
 ```powershell
@@ -11,7 +11,7 @@ uv run streamlit run src/rl_lander/gui.py               # the cockpit
 uv run streamlit run src/rl_lander/dashboard.py         # the dashboard
 ```
 
-The `ui` extra is what installs Streamlit and Plotly. A training and evaluation library has no
+The `ui` extra installs Streamlit and Plotly. A training and evaluation library has no
 reason to pull a web framework into every install, and on Windows the pyarrow that Streamlit
 brings faulted when its native libraries loaded after Box2D.
 
@@ -28,9 +28,9 @@ brings faulted when its native libraries loaded after Box2D.
 | Action distribution | how often each engine fired, which is what the reward pays for |
 | Reward per step | where in the descent the score was won or lost |
 
-Two rules hold it together. The metrics panel **says which of the two computed it**, because a
-number from a service and a number from an in-process model are different claims. And the page
-turns red when the local replay and the service's trajectory disagree: the check is
+The page follows two rules. The metrics panel says which of the two computed it, because a
+number from a service and a number from an in-process model are different claims. The page
+also turns red when the local replay and the service's trajectory disagree: the check is
 `rl_lander.replay.replay_matches`, and `docs/architecture.md` says what it protects against.
 
 ## The dashboard
@@ -55,7 +55,7 @@ and not the integer the environment returns, because Plotly reads an integer as 
 paints a gradient over two values.
 
 **A reference is dashed.** On the scatter of resting positions, the band that counts as on
-target is drawn in the palette's reserved colour with a dotted line. The dash is what
+target is drawn in the palette's reserved colour with a dotted line, which still
 distinguishes it when the colours are gone.
 
 **Every axis is titled with what it carries.** One `_styled` helper sets the background, the
