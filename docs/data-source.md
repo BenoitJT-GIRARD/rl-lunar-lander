@@ -1,11 +1,12 @@
 # Where the data comes from
 
-There is no dataset. Every number this repository publishes was generated locally, by running
-a simulator, and every row carries the seed that reproduces it. This page says what that
-simulator is, what it hands back, what the terms are, and what « generated locally » is worth
-as a provenance claim.
+There is no dataset. Every number this repository publishes was produced locally by running a
+simulator, and every exported episode carries the seed that reproduces it. This page describes
+the simulator, what it returns, its licence, and how far "produced locally" goes as a statement
+of provenance.
 
-Read on 2026-09-04; the environment and its version have not moved since.
+This description was written from Gymnasium 1.0.0 on 2026-09-04, and `pyproject.toml` pins
+that version.
 
 ## The environment
 
@@ -15,76 +16,94 @@ Read on 2026-09-04; the environment and its version have not moved since.
 | Provider | [Gymnasium](https://gymnasium.farama.org/), Farama Foundation, version 1.0.0 |
 | Physics | Box2D through `Box2D>=2.3.10` |
 | Licence | Gymnasium: MIT. Box2D: zlib. Both permit use, modification and redistribution. |
-| Options used | defaults: no wind, no turbulence, default gravity |
+| Options used | the defaults: wind off, hence no turbulence, and the default gravity |
 
-The task: a lander starts at the top of the frame with a random initial impulse and has to
-come to rest on a pad between two flags. Fuel is not modelled; firing an engine costs reward.
+A lander starts at the top of the frame with a random initial push and has to come to rest on a
+pad between two flags. The environment does not model fuel, and every engine firing lowers the
+reward.
 
-**Eight numbers in, one of four actions out.**
+The policy reads eight numbers and returns one of four actions.
 
 | Position in the vector | Observation | Unit |
 |---|---|---|
-| first and second | position, horizontal and vertical | environment units, pad at the origin |
-| third and fourth | velocity, horizontal and vertical | environment units per step |
-| fifth and sixth | angle, and angular velocity | radians, radians per step |
+| first and second | position, horizontal and vertical | scaled by the environment, with the pad at the origin |
+| third and fourth | velocity, horizontal and vertical | scaled by the environment |
+| fifth and sixth | angle, and angular velocity | radians, and a scaled angular velocity |
 | seventh and eighth | left and right leg in contact | a flag, zero or one |
 
-The four actions are: do nothing, fire the left engine, fire the main engine, fire the right
-engine. `src/rl_lander/api.py` refuses an observation outside the box the environment itself
-declares, because a policy is a function and will answer anything: given an altitude of 900,
-it returns an action that means nothing.
+The four actions are to do nothing, to fire the left engine, to fire the main engine and to fire
+the right engine. The API in `src/rl_lander/api.py` rejects an observation outside the bounds
+the environment declares. The policy returns an action for any eight numbers, including an
+altitude of 900 that no episode can reach, so the check runs before the policy is called.
 
-## What a seed does, and what it does not
+## What a seed fixes
 
-`env.reset(seed=n)` fixes the initial state and the sequence of draws for that episode. Two
-runs with the same seed, the same policy and the same package versions produce the same
-trajectory, and `tests/system/test_service_end_to_end.py` asks the running service for the
-same episode twice and compares the action sequences.
+`env.reset(seed=n)` fixes the initial state of an episode and the random draws made during it.
+Two runs with the same seed, the same policy and the same package versions, on the same
+platform, produce the same trajectory. `tests/system/test_service_end_to_end.py` asks the
+running service for the same episode twice and checks that the two action sequences are equal.
+`docs/operations.md` reports one episode that scores slightly differently on two platforms.
 
-A seed does not fix the training. `set_global_seed` seeds Python, NumPy and torch,
-and says so in its docstring; it cannot seed cuDNN's non-deterministic kernels or the order in
-which a vectorised environment returns. Two trainings at seed 42 land close together and not
-identically, which is one of the reasons the study reports a spread between runs rather than a
-number.
+A seed fixes the training less completely. `set_global_seed` seeds Python's `random`, NumPy
+and PyTorch, on the CPU and on every CUDA device, and it turns off the cuDNN autotuner. It does
+not guarantee a training identical bit for bit. Its docstring notes that string hashing stays
+random within the process unless `PYTHONHASHSEED` was set before the interpreter started, and
+the DQN run trains on the GPU, whose kernels can be non-deterministic. The repository holds no
+repeated training, so how close a retraining comes to the committed weights has not been
+measured.
 
 ## The evaluation grids
 
-An evaluation grid is a seed and a count: 100 consecutive episodes from `env.reset(seed=g)`,
-`seed=g+1`, and so on. Six grids are used, `2024, 7, 99, 123, 555, 31337`, and the first is
-the one whose episodes are exported row by row.
+An evaluation grid is a starting seed and a count. The grid that starts at seed g plays 100
+episodes, reset with the seeds g, g + 1 and so on up to g + 99. Six grids are used, `2024, 7,
+99, 123, 555, 31337`, and the episodes of the first one are exported row by row. Grids that
+start close together share episodes: grids 99 and 123 both play the 76 episodes seeded 123 to
+198, and grids 7 and 99 both play the 8 episodes seeded 99 to 106.
 
-The grids were fixed in code before the policy was scored, and they are named here for that
-reason: a grid chosen after the numbers are in is not a measurement. The exported grid turns
-out to be the *least* flattering of the six.
+The six grids already appear in the evaluation manifest committed in 9c8fb3f, which records a
+scoring of the previous policy on them at 05:47 UTC on 4 September 2026. The manifest committed
+in 471b052 records the scoring of the shipped policy on the same grids at 08:34 UTC that day, so
+the grids were in use before the shipped policy was scored. The git revisions that these two
+manifests record are absent from the published history. The current manifest comes from a rerun
+of `scripts/evaluate_and_export.py` on 27 October 2026, which wrote the episodes and the summary
+again with identical content and records revision 15f576e of the published history. Of the six,
+the exported grid has the lowest mean reward, the lowest landing rate and the lowest score on a
+single episode.
 
 ## What is published, and what it contains
 
-Everything under `reports/` is generated by a script of this repository from a run of that
-simulator. None of it contains anything anyone else owns.
+The table lists the files of results under `reports/`. Each is written by a script of this
+repository from runs of the simulator, and all of their content comes from those runs. The
+folder also holds the figures that `scripts/build_figures.py` draws from them, the coverage
+report of the test suite under `coverage/`, and `run-evidence.json`, in which `scripts/smoke.py`
+records its last run.
 
 | File | What it holds | Written by |
 |---|---|---|
 | `evaluation_episodes.csv` | one row per episode of the exported grid, with its seed | `scripts/evaluate_and_export.py` |
 | `evaluation_summary.json` | the metrics of that collection, and the spread across the six grids | `scripts/evaluate_and_export.py` |
-| `evaluation_manifest.json` | the policy scored, the grids, the package versions, the git revision | `scripts/evaluate_and_export.py` |
+| `evaluation_manifest.json` | the policy scored, the grids, the versions of Gymnasium, Stable-Baselines3, NumPy, PyTorch and Box2D, the git revision | `scripts/evaluate_and_export.py` |
 | `seed_study.json` | the five trainings and the DQN at equal budget | `scripts/aggregate_study.py` |
 | `hyperparameter_trials.csv` | one row per single-parameter trial | `scripts/aggregate_study.py` |
 | `learning_curve_band.csv` | median and interquartile range of the five curves | `scripts/aggregate_study.py` |
+| `checkpoint_comparison.csv` | the best and final checkpoints of two runs, scored on the exported grid | `scripts/compare_checkpoints.py` |
 | `training_curves.csv` | the shipped run's own curve | `scripts/publish_run.py` |
 
-`models/ppo/best.zip` is a Stable-Baselines3 checkpoint: weights this repository trained, from
-an architecture the library provides. The per-run directories live under `var/runs/` and are
-not tracked: each holds 148 KB of weights, which the seed and the code reproduce closely but not
-exactly.
+`models/ppo/best.zip` is a Stable-Baselines3 checkpoint of about 148 KB. It holds weights that
+this repository trained, on an architecture the library provides. The run directories under
+`var/runs/` are not tracked. Each one holds the checkpoints of a run, its manifest and its
+training curve.
 
-## What « generated locally » is worth
+## How far "produced locally" goes
 
-It settles the question of redistribution and leaves the question of reproducibility open. A
-reader who reruns `scripts/train_study.py` will not get these exact weights: the training is
-seeded but not deterministic, for the reasons above. They will get a policy whose score falls
-inside the published between-runs spread, which is the claim `docs/protocol.md` is built to
-make.
+Producing the data locally settles the question of redistribution, since no third party's data
+is involved. Reproducibility is a separate question. The section on seeds above explains why a
+rerun of `scripts/train_study.py` with the same seeds may differ from the committed weights, by
+an amount that has not been measured. The spread between
+runs, which `docs/protocol.md` defines and the README reports, is the variation to expect when
+the configuration is trained with new seeds.
 
-The manifest makes the published scores checkable without retraining anything: it
-names the checkpoint, the six grids and the versions, and `scripts/evaluate_and_export.py`
-rescores that checkpoint in about a minute.
+The manifest lets a reader check the published scores without any retraining.
+`reports/evaluation_manifest.json` names the checkpoint, the six grids and the versions of
+Gymnasium, Stable-Baselines3, NumPy, PyTorch and Box2D, and `scripts/evaluate_and_export.py`
+scores that checkpoint again in about a minute.

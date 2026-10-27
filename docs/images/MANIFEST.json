@@ -14,7 +14,7 @@
       "device_scale_factor": 2,
       "app_state": "the API started from the policy committed at models/ppo/best.zip, and the two Streamlit pages started against it on their own ports",
       "data_source": "none: the page is generated from the Pydantic models",
-      "demonstrates_behaviour": "the five routes, the eight-number observation the agent routes accept and the trajectory the run route returns are generated from the Pydantic models, so the page a caller reads cannot drift from the contract the service enforces",
+      "demonstrates_behaviour": "the six routes, the eight-number observation the agent routes accept and the trajectory the run route returns are generated from the Pydantic models, so the page a caller reads cannot drift from the contract the service enforces",
       "git_revision": "8a6532ee51138bd4814b7005f84e9e1690c0188c",
       "depends_on": [
         "src/rl_lander/api.py"
@@ -63,15 +63,15 @@
     },
     "landing.gif": {
       "sha256": "431637ef654525593bf5aec3adc3251534008f5169f1da29340c436b1cd22ca7",
-      "written": "2026-09-15",
+      "written": "2026-10-27",
       "source": "src/rl_lander/record_video.py",
       "command": "uv run python -m rl_lander.record_video",
       "frames": 160,
       "fps": 20,
-      "app_state": "the policy committed at models/ppo/best.zip, flown from seed 0 upwards until the clip holds at least two landings and reaches twenty-two seconds",
+      "app_state": "the policy committed at models/ppo/best.zip, flown from seed 0 upwards until the recorded clip holds at least two landings and reaches twenty-two seconds; this animation is the opening of that clip, decimated and capped at 8 seconds",
       "data_source": "none: the frames are rendered by the environment during the flight",
       "demonstrates_behaviour": "the shipped policy brings the lander down between the flags and comes to rest on its legs, which is the claim the landing rate puts a number on",
-      "git_revision": "8a6532ee51138bd4814b7005f84e9e1690c0188c",
+      "git_revision": "15f576ed9be8c6b8dd70103da7f5e42786b94863",
       "depends_on": [
         "src/rl_lander/record_video.py",
         "models/ppo/best.zip"
