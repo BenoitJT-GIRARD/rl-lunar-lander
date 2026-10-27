@@ -27,8 +27,10 @@ from rl_lander.utils.paths import ROOT_DIR, ROOT_ENV
 
 pytestmark = pytest.mark.system
 
-#: Two rollouts of eight environments. Enough for the callback to fire and for both
-#: checkpoints to be decided; far too little to land anything.
+#: One rollout. PPO collects 1,024 steps in each of its 16 environments before it compares
+#: the count with this budget, so the run lasts 16,384 steps. Enough for the evaluation
+#: callback to fire once and for both checkpoints to be decided; far too little to land
+#: anything.
 TIMESTEPS = 2048
 SEED = 7
 TIMEOUT = 600
@@ -94,12 +96,12 @@ def test_the_run_records_what_it_did_beside_its_checkpoint(trained: Path) -> Non
     assert recorded["hyperparameters"]["seed"] == SEED
 
 
-def test_a_run_that_never_improved_says_so_instead_of_leaving_two_names(trained: Path) -> None:
-    """At this budget no evaluation beats the start, and the manifest is the one that says it.
+def test_best_is_final_and_the_files_on_disk_agree(trained: Path) -> None:
+    """The manifest says whether `best.zip` is the final state, and the run directory agrees.
 
-    `best_is_final` is the flag downstream reads. When it is true there is no `final.zip`
-    beside `best.zip`, because two names for one file is what
-    `scripts/compare_checkpoints.py` exists to keep apart.
+    `best_is_final` is the flag downstream reads. It is true only when training ended before
+    the first evaluation, and then there is no `final.zip` beside `best.zip`, because two
+    names for one file is what `scripts/compare_checkpoints.py` exists to keep apart.
     """
     run = trained / "var" / "runs" / "ppo" / f"seed-{SEED}"
     recorded = json.loads((run / "manifest.json").read_text(encoding="utf-8"))

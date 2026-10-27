@@ -55,7 +55,7 @@ def test_a_run_leaves_a_checkpoint_and_the_metrics_it_scored(tiny_run: Path) -> 
     assert "landing_rate" in manifest and "mean_reward" in manifest
 
 
-def test_a_run_that_never_improved_says_so_instead_of_shipping_its_final_state(
+def test_a_run_with_no_evaluation_says_so_instead_of_shipping_its_final_state(
     tiny_run: Path,
 ) -> None:
     """2048 timesteps is shorter than one evaluation interval, so no best checkpoint exists.
@@ -67,11 +67,11 @@ def test_a_run_that_never_improved_says_so_instead_of_shipping_its_final_state(
     assert manifest["best_is_final"] is True
 
 
-def test_publishing_refuses_a_run_that_never_improved(tiny_run: Path) -> None:
+def test_publishing_refuses_a_run_with_no_evaluation(tiny_run: Path) -> None:
     """Otherwise an untrained policy ends up behind the README's figures."""
     from publish_run import publish
 
-    with pytest.raises(SystemExit, match="never improved"):
+    with pytest.raises(SystemExit, match="before its first evaluation"):
         publish(tiny_run)
 
 

@@ -30,7 +30,7 @@ DEFAULT_API_URL = os.environ.get("RL_LANDER_API_URL", "http://127.0.0.1:8000")
 
 @st.cache_resource(show_spinner=False)
 def _local_agent(model_path: str) -> LunarLanderAgent:
-    """The policy, loaded once per session rather than once per click.
+    """The policy, loaded once per server process and shared by every session.
 
     Unpacking a checkpoint takes a noticeable moment, and the previous version paid it on
     every run of the same unchanged model.

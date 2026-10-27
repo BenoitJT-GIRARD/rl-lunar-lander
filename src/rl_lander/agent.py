@@ -29,7 +29,8 @@ ACTION_LABELS: dict[int, str] = {
 
 #: The checkpoint loaders, by name. A lookup, and not a two-branch conditional: with
 #: ``PPO if algorithm == "ppo" else DQN``, every value that was not exactly ``"ppo"`` --
-#: including a typo -- meant DQN, and the failure surfaced much later as a shape mismatch.
+#: including a typo -- meant DQN, and loading a PPO checkpoint then failed inside
+#: Stable-Baselines3 on a missing ``q_net`` attribute, an error that names no algorithm.
 ALGORITHMS: dict[str, type[BaseAlgorithm]] = {"ppo": PPO, "dqn": DQN}
 
 
@@ -149,8 +150,9 @@ class LunarLanderAgent:
             total_reward = float(sum(rewards))
             # LunarLander assigns exactly +100 when the lander comes to rest and -100 when
             # it crashes or leaves the frame, so the last reward answers the question
-            # directly. `total_reward >= 200` answered a different one -- it is the mean
-            # at which the task counts as solved, and it says nothing about one episode.
+            # directly. `total_reward >= 200` answered a different one -- whether the score
+            # reached 200, Gymnasium's bar for a solved episode, which a policy can miss while
+            # still coming to rest.
             landed = bool(terminated and rewards and rewards[-1] > 0.0)
             return (
                 EpisodeResult(

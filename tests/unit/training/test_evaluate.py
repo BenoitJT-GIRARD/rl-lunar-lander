@@ -152,3 +152,26 @@ def test_the_manifest_names_the_artefact_and_not_the_machine(tmp_path: Path) -> 
     assert payload["seeds"] == [2024, 7]
     assert payload["versions"]["gymnasium"]
     assert payload["evaluated_at"].endswith("+00:00")
+
+
+def test_the_manifest_records_every_version_the_smoke_run_names(tmp_path: Path) -> None:
+    """`scripts/smoke.py` lists the distributions whose version can change a score.
+
+    The evaluation manifest recorded three of the five and left out torch and Box2D.
+    """
+    import json
+
+    from smoke import TOOLS
+
+    output = write_manifest(
+        tmp_path / "manifest.json",
+        model_path=Path("models/ppo/best.zip"),
+        algorithm="PPO",
+        seeds=[2024],
+        n_episodes=100,
+        deterministic=True,
+    )
+
+    versions = json.loads(output.read_text(encoding="utf-8"))["versions"]
+    recorded = {name.replace("_", "-").lower() for name, value in versions.items() if value}
+    assert {tool.lower() for tool in TOOLS} <= recorded

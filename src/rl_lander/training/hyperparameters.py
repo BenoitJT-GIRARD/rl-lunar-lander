@@ -31,7 +31,9 @@ class PPOHyperParameters:
     seed: int = 42
     #: CPU, deliberately. Stable-Baselines3 warns that PPO with an MLP policy belongs on
     #: the CPU, and on this project it is measurable: 50k steps take 14.9 s on the CPU
-    #: against 20.3 s on an RTX 4060 Ti, so a full run is 5 minutes rather than 7. The
+    #: against 20.3 s on an RTX 4060 Ti, about 5 minutes against 7 per million steps at
+    #: that rate. A full run takes longer: the shipped one, with its periodic evaluations,
+    #: took 991 s (`elapsed_seconds` in reports/training_curves.csv). The
     #: policy is three small dense layers; the GPU spends its time on transfers, and the
     #: rollout loop -- sixteen Box2D simulations -- is CPU-bound either way.
     device: str = "cpu"

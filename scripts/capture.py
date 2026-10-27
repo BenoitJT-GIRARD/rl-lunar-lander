@@ -120,7 +120,8 @@ SERVE_COMMAND: tuple[str, ...] = (
 )
 #: The route that answers once the product is ready. ``/ready`` and not ``/health``: the
 #: second says the process is up, the first says a policy is loaded, and photographing the
-#: documentation page of a service with no policy would show five routes that all answer 503.
+#: documentation page of a service with no policy would show six routes, four of which answer
+#: 503.
 HEALTH_ROUTE: str | None = "/ready"
 
 #: The two Streamlit pages, each on its own port. They are surfaces of this repository that
@@ -204,7 +205,7 @@ CAPTURES: tuple[Capture, ...] = (
         ready_selector="#operations-tag-agent",
         app_state=STATE,
         demonstrates_behaviour=(
-            "the five routes, the eight-number observation the agent routes accept and the "
+            "the six routes, the eight-number observation the agent routes accept and the "
             "trajectory the run route returns are generated from the Pydantic models, so the "
             "page a caller reads cannot drift from the contract the service enforces"
         ),

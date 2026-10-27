@@ -20,7 +20,9 @@ metrics:
     anchor: "261.80 — reports/evaluation_summary.json#metrics.mean_reward"
     business_reading: >-
       How well the shipped autopilot flies, on the grid whose episodes are published row by
-      row. Gymnasium calls the task solved above 200, so this policy clears it with room.
+      row. Gymnasium's documentation counts an episode that scores at least 200 as a solution.
+      This repository asks the same 200 of the mean reward of every grid, and this policy's
+      mean clears it with room.
     source: "scripts/evaluate_and_export.py, 100 episodes on grid seed 2024"
     uncertainty: >-
       Reported beside `sd_across_episodes`, which disperses the 100 episodes of this grid.
@@ -37,8 +39,8 @@ metrics:
       here means a consistent pilot, not a good method.
     source: "scripts/evaluate_and_export.py, over the same 100 episodes"
     uncertainty: >-
-      A population standard deviation over the 100 episodes of the grid, with no interval
-      around it: it describes those episodes and estimates nothing beyond them.
+      A sample standard deviation, with ddof = 1, over the 100 episodes of the grid, which
+      are treated as a sample of the starting conditions. No interval is given around it.
 
   sd_between_runs:
     definition: >-
@@ -48,17 +50,20 @@ metrics:
     direction: target
     anchor: "13.32 — reports/seed_study.json#spread_between_runs"
     business_reading: >-
-      What retraining this configuration gets you. It is the transportable number, and the
-      one a reader should carry away: another run of the same recipe lands in that range.
+      How much the score moves when this configuration is trained again. It describes the
+      method, where the other two dispersions describe one policy. The five run means range
+      from 237.43 to 265.39.
     source: "scripts/aggregate_study.py, over seeds 42 to 46 at one million steps each"
     uncertainty: >-
-      Five points. Enough to show the training seed matters and to publish a spread, not
-      enough to put an interval on that spread; `docs/protocol.md` says twenty would be right.
+      Five points. Enough to show that the training seed matters and to publish a spread.
+      Under a normal model the 95% interval on that spread runs from roughly 8 to 38, as
+      `docs/protocol.md` states, which is too wide to be useful.
 
   sd_across_grids:
     definition: >-
-      The standard deviation of the mean reward over six independent evaluation grids, with
-      the policy held fixed.
+      The standard deviation of the mean reward over six evaluation grids of 100 consecutive
+      episode seeds, with the policy held fixed. The grids overlap in part: grid 99 shares 8
+      seeds with grid 7 and 76 with grid 123.
     unit: "reward units of LunarLander-v3"
     direction: target
     anchor: "3.33 — reports/evaluation_summary.json#across_seeds"
@@ -67,8 +72,8 @@ metrics:
       Four times smaller than the spread between trainings, which is the finding.
     source: "scripts/evaluate_and_export.py, grids 2024, 7, 99, 123, 555, 31337"
     uncertainty: >-
-      Six points, each itself a mean over 100 episodes. The mean is stable to about a point;
-      the worst episode is not, and moves from 123 to 227 across the same six.
+      Six points, each itself a mean over 100 episodes. The grid means range from 261.80 to
+      269.57, and the worst episode moves further, from 123 to 227 across the same six.
 
   landing_rate:
     definition: >-
@@ -96,8 +101,9 @@ metrics:
       beside the landing rate and never merged with it: on seed 44 they differ by two points.
     source: "src/rl_lander/training/evaluate.py, over the same episodes"
     uncertainty: >-
-      A count over 100 episodes. The 200 is a property of the task averaged over episodes,
-      which is precisely why it is not used to decide whether a single episode landed.
+      A count over 100 episodes. Gymnasium's documentation counts an episode that scores at
+      least 200 as a solution. Whether the lander came to rest is a separate question, which
+      `landing_rate` answers from the terminal reward.
 
   worst_episode:
     definition: "The lowest total reward of the episodes of one grid."
@@ -148,8 +154,9 @@ metrics:
     direction: higher_is_better
     anchor: "-81.0 for gamma=0.99 — reports/hyperparameter_trials.csv#delta_vs_baseline"
     business_reading: >-
-      What changing one knob is worth. Read alone it ranks four numbers; read against the
-      13.32 spread between seeds, three of the four differences turn out to be noise.
+      What changing one knob is worth. Read alone it ranks four numbers. Read against the
+      13.32 spread between seeds, all three trial differences exceed it, the learning-rate
+      trial by about 0.3 (+13.6).
     source: "scripts/aggregate_study.py, one seed per trial at the same budget"
     uncertainty: >-
       One training run per trial, so the difference carries the whole between-runs dispersion

@@ -4,7 +4,8 @@ Reads `reports/evaluation_episodes.csv` and `reports/training_curves.csv`, and s
 curve, the aggregate metrics, the per-episode telemetry behind filters, and how the reward
 relates to engine use.
 
-One rule holds the page together: **every section sees the same filtered frame.** The first
+One rule holds the page together: **every section that shows episodes sees the same filtered
+frame.** The training curve is not an episode table and is drawn unfiltered. The first
 version filtered inside the episode section and then handed the whole, unfiltered frame to
 the engine analysis, so two panels on one screen described two different populations.
 """
@@ -15,7 +16,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from rl_lander.artifacts import CURVE_COLUMNS, EVALUATION_COLUMNS, read_table
+from rl_lander.artifacts import CURVE_COLUMNS, CURVES_REMEDY, EVALUATION_COLUMNS, read_table
 from rl_lander.charts import OUTCOME_COLOURS, styled
 from rl_lander.figure_style import PALETTE
 from rl_lander.utils import EVALUATION_CSV, TRAINING_CURVES_CSV
@@ -145,9 +146,9 @@ def _episode_section(frame: pd.DataFrame) -> None:
             title="Where the lander came to rest (size = main-engine firings)",
             color_discrete_map=OUTCOME_COLOURS,
         )
-        # The pad: the band of horizontal positions that count as on target. Dashed, because
-        # it is a reference and not a series, and the palette reserves the dash for exactly
-        # that.
+        # A band around the centre of the pad, whose flags stand at x = -0.2 and x = 0.2 in
+        # these units. Dotted, because it is a reference and not a series, and drawn in the
+        # colour the palette reserves for references.
         fig.add_vline(x=-0.1, line_dash="dot", line_color=PALETTE["reference"])
         fig.add_vline(x=0.1, line_dash="dot", line_color=PALETTE["reference"])
         styled(fig, "Horizontal position at rest", "Altitude at rest")
@@ -159,8 +160,8 @@ def _episode_section(frame: pd.DataFrame) -> None:
 def _engine_section(frame: pd.DataFrame) -> None:
     st.subheader("Engine use")
     st.caption(
-        "Both engines, not only the main one. The side thrusters cost fuel and the reward "
-        "function charges for them."
+        "Main and side engines together. The environment tracks no fuel, and its reward "
+        "subtracts a cost on every step an engine fires."
     )
 
     total = frame["main_engine_firings"] + frame["side_engine_firings"]
@@ -196,9 +197,12 @@ def _engine_section(frame: pd.DataFrame) -> None:
 def main() -> None:
     st.set_page_config(page_title="Performance dashboard", layout="wide")
     st.title("Performance dashboard")
-    st.caption("Training and evaluation of the autopilot. The sidebar filters every panel.")
+    st.caption(
+        "Training and evaluation of the autopilot. The sidebar filters every panel below the "
+        "training curve."
+    )
 
-    curves, curves_problem = read_table(TRAINING_CURVES_CSV, CURVE_COLUMNS)
+    curves, curves_problem = read_table(TRAINING_CURVES_CSV, CURVE_COLUMNS, remedy=CURVES_REMEDY)
     episodes, episodes_problem = read_table(EVALUATION_CSV, EVALUATION_COLUMNS)
 
     if curves is None and episodes is None:

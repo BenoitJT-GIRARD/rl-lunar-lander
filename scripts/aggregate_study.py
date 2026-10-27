@@ -1,6 +1,6 @@
 """Turn the study's runs into the three artefacts the README and the notebook quote.
 
-Reads every manifest under ``models/`` and writes:
+Reads every run manifest under ``var/runs/`` and writes:
 
 ``reports/seed_study.json``
     The five baseline seeds, their spread, and the DQN run at the same step budget. This is
@@ -9,7 +9,7 @@ Reads every manifest under ``models/`` and writes:
 
 ``reports/hyperparameter_trials.csv``
     One row per single-parameter trial, scored by the same protocol as the baseline. It
-    replaces a table of "~280", "< 200", "~270" that nothing produced. The column that
+    replaces a table of "~280", "< 200", "~270", "~240" that nothing produced. The column that
     matters is the last one: whether the difference from the baseline is larger than the
     spread the baselines themselves show. Below that, a trial says nothing.
 

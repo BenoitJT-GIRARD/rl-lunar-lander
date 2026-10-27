@@ -1,6 +1,6 @@
 """Training pipeline for LunarLander-v3, PPO and DQN behind one CLI.
 
-Each run gets its own directory, ``models/<algo>/seed-<n>/``, holding the checkpoint
+Each run gets its own directory, ``var/runs/<algo>/seed-<n>/``, holding the checkpoint
 ``EvalCallback`` kept (``best.zip``), the state training ended on (``final.zip``) and a
 manifest with the metrics that checkpoint scored. Three things follow from that layout,
 and all three were wrong in the first version.
@@ -11,8 +11,8 @@ and all three were wrong in the first version.
 **The best checkpoint is what gets shipped and scored.** The first version evaluated the
 object left in memory when training stopped, and saved it under a name that said ``best``.
 In reinforcement learning the two differ: performance oscillates late in training, and the
-gap is not small. When no evaluation ever improved on the start there is no best
-checkpoint, and the manifest says which of the two it is.
+gap is not small. When training ends before the first evaluation there is no best
+checkpoint, and the manifest says which of the two was kept.
 
 **A model on disk carries the metrics it scored.** They used to be printed and lost.
 
@@ -70,8 +70,10 @@ def _score(model, *, algorithm: str, hp, best_is_final: bool) -> dict:
         "seed": hp.seed,
         "total_timesteps": hp.total_timesteps,
         "evaluation_seed": CANONICAL_EVAL_SEED,
-        # True when no evaluation ever improved on the start, so `best` and `final` are the
-        # same file. Worth recording: it means the callback never fired usefully.
+        # True when no evaluation ran during training, so `best` and `final` are the same
+        # file. SB3's EvalCallback starts from a best mean of minus infinity, so its first
+        # evaluation always saves a checkpoint: only a run shorter than one evaluation
+        # interval sets this flag.
         "best_is_final": best_is_final,
         **summary,
         "hyperparameters": asdict(hp),
@@ -98,7 +100,7 @@ def train_ppo(
     ``output`` is the run directory. It holds ``best.zip`` -- the checkpoint
     ``EvalCallback`` kept -- and ``final.zip``, the state training ended on. The two are
     not the same policy, and returning the second under the first's name is what the
-    original version did. When no evaluation ever improved on the start there is no best
+    original version did. When training ends before the first evaluation there is no best
     checkpoint: the final state becomes ``best.zip``, no ``final.zip`` is left beside it,
     and the manifest records ``best_is_final`` so nothing downstream has to guess.
     """
@@ -130,7 +132,7 @@ def train_ppo(
         render=False,
     )
     # In the run's own directory, like every other artefact it produces. The published
-    # curve under data/ is the retained run's, copied there by scripts/publish_run.py.
+    # curve under reports/ is the retained run's, copied there by scripts/publish_run.py.
     progress_callback = CsvProgressCallback(output_path=run / "training_curves.csv")
 
     model.learn(
@@ -150,8 +152,8 @@ def train_ppo(
         best_path.replace(run / "best.zip")
     kept = run / "best.zip"
     if not kept.exists():
-        # No evaluation ever improved on the start, so there is no best checkpoint. Say so
-        # where the earlier version shipped the final model under the other name in silence.
+        # No evaluation ran during training, so there is no best checkpoint. Say so where
+        # the earlier version shipped the final model under the other name in silence.
         (run / "final.zip").replace(kept)
         best_is_final = True
     else:
@@ -237,7 +239,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=None,
         help=(
-            "Run directory. Defaults to models/<algo>/seed-<seed>/, chosen after --algo is "
+            "Run directory. Defaults to var/runs/<algo>/seed-<seed>/, chosen after --algo is "
             "read -- the default used to be the PPO path whatever the algorithm, so a DQN "
             "run without --output overwrote the PPO artefact."
         ),
@@ -273,8 +275,8 @@ def main(argv: list[str] | None = None) -> None:  # pragma: no cover - CLI helpe
     )
     if metrics["best_is_final"]:
         print(
-            "  No evaluation improved on the starting policy, so best.zip is the "
-            "final state. Train longer before reading anything into the score."
+            "  No evaluation ran during training, so best.zip is the final state. "
+            "Train longer before reading anything into the score."
         )
     print(f"  {run / 'best.zip'}\n  {run / 'manifest.json'}")
 

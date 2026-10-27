@@ -7,9 +7,9 @@ dashboard — comes from the same episodes. Running two loops and reporting both
 first version did, leaves a reader with two numbers and no way to tell which is the result.
 
 **Landing is detected, not inferred from the score.** `landed` used to mean
-``total_reward >= 200``, which is the threshold at which Gymnasium considers the
-*environment solved on average* — not a statement about any single episode. The real
-signal is unambiguous and comes from the environment itself: on termination it assigns
+``total_reward >= 200``, the score at which Gymnasium's documentation counts an episode as a
+solution. A score does not say whether the lander came to rest. The real signal is
+unambiguous and comes from the environment itself: on termination it assigns
 exactly ``+100`` when the lander comes to rest and exactly ``-100`` when it crashes or
 leaves the frame. That is what is read here.
 
@@ -40,8 +40,10 @@ from rl_lander.utils import EVALUATION_CSV
 MAIN_ENGINE = 2
 SIDE_ENGINES = (1, 3)
 
-#: Mean reward at which Gymnasium considers the environment solved. It is a property of the
-#: task, not of an episode, and it is only ever compared against a *mean*.
+#: The score at which Gymnasium's documentation counts an episode as a solution. It is
+#: compared with each episode's total reward here (`meets_threshold`), and with the mean
+#: reward of each grid in `scripts/evaluate_and_export.py`, where every grid has to reach it
+#: for the task to count as solved.
 SOLVED_THRESHOLD = 200.0
 
 
@@ -135,7 +137,7 @@ def summarise(records: Sequence[EpisodeRecord]) -> dict[str, float]:
     times, and a generator would be silently empty after the first pass.
 
     ``landing_rate`` and ``threshold_rate`` are both reported because they answer different
-    questions and, on a good policy, do not agree.
+    questions. They can disagree: on training seed 44 the first is 0.98 and the second 0.96.
     """
     records = list(records)
     if not records:
@@ -261,8 +263,11 @@ def write_manifest(
 
     The first version published an absolute path to the author's own working folder and
     nothing else — no seed, no version, no date. A figure without a manifest is a figure
-    nobody can check.
+    nobody can check. The versions recorded are those `scripts/smoke.py` names as able to
+    change the result.
     """
+    from importlib.metadata import version
+
     import gymnasium
     import stable_baselines3
 
@@ -285,6 +290,8 @@ def write_manifest(
             "gymnasium": gymnasium.__version__,
             "stable_baselines3": stable_baselines3.__version__,
             "numpy": np.__version__,
+            "torch": version("torch"),
+            "Box2D": version("Box2D"),
         },
     }
     return write_json(output, payload)

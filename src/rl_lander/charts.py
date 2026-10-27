@@ -9,7 +9,9 @@ no Python traceback to read.
 
 So both pages draw with Plotly, and both take their colours from
 :mod:`rl_lander.figure_style` through this module. A chart here never picks a colour of its
-own, and the two pages cannot drift apart into two palettes.
+own, and the two pages cannot drift apart into two palettes. Two dashboard series are drawn
+outside this module with no colour set, so Plotly paints them in its defaults: the ±1 std
+lines of `_training_section` and the bars of `_engine_section`.
 """
 
 from __future__ import annotations

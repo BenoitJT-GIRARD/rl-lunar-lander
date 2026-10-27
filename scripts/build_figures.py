@@ -161,7 +161,8 @@ def figure_learning_curve(band: pd.DataFrame, study: dict) -> Path:
         FIGURES_DIR / "learning_curve.png",
         n={"runs": int(band["n_runs"].min()), "points": len(band)},
         dispersion=(
-            f"band: 25th to 75th percentile across the {study['n_runs']} runs, at each checkpoint"
+            f"band: 25th to 75th percentile across the {study['n_runs']} runs, "
+            "on a common grid every 10 000 steps"
         ),
         source=SOURCE,
         note="training episodes, actions sampled; the published score is a deterministic run",
@@ -176,9 +177,11 @@ def figure_learning_curve(band: pd.DataFrame, study: dict) -> Path:
 def figure_dispersions(study: dict, summary: dict) -> Path:
     """The same « ± » computed three ways, on the same axis, in the same unit.
 
-    Nothing about the shipped policy changes between the three bars. What changes is what was
-    allowed to vary while it was measured: the episode, the evaluation grid, or the training
-    itself. The tallest bar is the one a single-run report never shows.
+    The first two bars hold the shipped policy fixed; the third compares the five policies
+    that five trainings of one configuration produced. What changes from bar to bar is what
+    was allowed to vary while it was measured: the episode, the evaluation grid, or the
+    training itself. The first bar is a spread of single-episode rewards, the other two are
+    spreads of mean rewards. Between trainings is the bar a single-run report never shows.
     """
     across = summary["across_seeds"]
     bars = [
@@ -214,8 +217,8 @@ def figure_dispersions(study: dict, summary: dict) -> Path:
         ax.text(index, value + 0.6, f"{value:.2f}", ha="center", fontsize=10, color=PALETTE["ink"])
 
     ax.set_xlabel("What was allowed to vary")
-    ax.set_ylabel("Standard deviation of the mean reward")
-    ax.set_title("Three dispersions a ± can describe, on one policy")
+    ax.set_ylabel("Standard deviation, in reward units")
+    ax.set_title("Three dispersions a ± can describe")
     ax.tick_params(axis="x", labelsize=8)
     _breathe(fig)
 

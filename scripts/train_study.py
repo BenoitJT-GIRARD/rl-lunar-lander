@@ -8,8 +8,8 @@ hyper-parameters, seeds 42 to 46. The repository used to publish one run's score
 were the method's.
 
 **Are the notebook's hyper-parameter trials real?** They were quoted as "~280", "< 200",
-"~270" with nothing behind them. Each trial changes one parameter from the baseline, runs
-the same budget, and is scored by the same protocol. One seed each, so a trial is only
+"~270", "~240" with nothing behind them. Each trial changes one parameter from the baseline,
+runs the same budget, and is scored by the same protocol. One seed each, so a trial is only
 readable against the seed-to-seed spread the five baselines measure -- which is why they
 belong in the same grid.
 

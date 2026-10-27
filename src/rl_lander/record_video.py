@@ -234,7 +234,9 @@ def _declare_gif(image: Path, frames: int) -> None:
         "fps": GIF_FPS,
         "app_state": (
             "the policy committed at models/ppo/best.zip, flown from seed 0 upwards until "
-            "the clip holds at least two landings and reaches twenty-two seconds"
+            "the recorded clip holds at least two landings and reaches twenty-two seconds; "
+            "this animation is the opening of that clip, decimated and capped at "
+            f"{GIF_SECONDS:.0f} seconds"
         ),
         "data_source": "none: the frames are rendered by the environment during the flight",
         "demonstrates_behaviour": (

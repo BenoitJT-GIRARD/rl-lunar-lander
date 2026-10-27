@@ -3,18 +3,18 @@
     "dispersions.png": {
       "axes": [
         {
-          "title": "Three dispersions a ± can describe, on one policy",
+          "title": "Three dispersions a ± can describe",
           "x": "What was allowed to vary",
-          "y": "Standard deviation of the mean reward"
+          "y": "Standard deviation, in reward units"
         }
       ],
       "dispersion": "each bar is itself a standard deviation; none is an error bar on another",
       "dpi": 200,
       "n": "n(episodes) = 100, n(grids) = 6, n(runs) = 5",
-      "sha256": "c42d91d3779a82a38933fd624b310f1bfa34e33ca88936abb3c8a89caaf0be6c",
+      "sha256": "f734d28c1fef215218eb194c841ba216ed4444c27e22f0f76b9e5de18d4b4236",
       "source": "scripts/build_figures.py",
       "style_version": 1,
-      "written": "2026-09-15"
+      "written": "2026-10-27"
     },
     "learning_curve.png": {
       "axes": [
@@ -24,13 +24,13 @@
           "y": "Episode reward, rolling mean"
         }
       ],
-      "dispersion": "band: 25th to 75th percentile across the 5 runs, at each checkpoint",
+      "dispersion": "band: 25th to 75th percentile across the 5 runs, on a common grid every 10 000 steps",
       "dpi": 200,
       "n": "n(runs) = 5, n(points) = 100",
-      "sha256": "3a28ae88b381f16e7b8ff2435a34fdcf1e0cc18b2233fd7d0ae2de9214901865",
+      "sha256": "85badf44998c8316357fd565487d4f4375d0faa48f3026d6f0de6509e3eb5954",
       "source": "scripts/build_figures.py",
       "style_version": 1,
-      "written": "2026-09-15"
+      "written": "2026-10-27"
     },
     "seed_spread.png": {
       "axes": [

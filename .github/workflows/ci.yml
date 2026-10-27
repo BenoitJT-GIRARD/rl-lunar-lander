@@ -38,7 +38,7 @@ jobs:
         run: uv run python -m bandit -c pyproject.toml -r src scripts
 
       # The suite trains throwaway policies for a few thousand steps on CPU. It does read
-      # the published artefacts -- data/*.csv, data/*.json and models/ppo/best.zip are
+      # the published artefacts -- reports/*.csv, reports/*.json and models/ppo/best.zip are
       # tracked -- because the tests that matter most assert those are consistent.
       #
       # SDL_VIDEODRIVER=dummy: the recorder tests render frames through pygame. Gymnasium

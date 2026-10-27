@@ -113,9 +113,9 @@ class RunRequest(BaseModel):
 class RunResponse(BaseModel):
     """A complete episode.
 
-    ``landed`` is read from the environment's terminal reward, not from the score: the
-    +200 threshold is a property of the task averaged over episodes, and says nothing about
-    any single one.
+    ``landed`` is read from the environment's terminal reward, not from the score.
+    Gymnasium's documentation counts an episode that scores at least 200 as a solution, and
+    reaching that score and landing are separate events.
     """
 
     total_reward: float
@@ -147,8 +147,8 @@ def _resolve_algorithm() -> str:
     """The algorithm to load with, refused rather than guessed when it is unknown.
 
     ``RL_LANDER_ALGO=xgboost`` used to load the checkpoint as a DQN -- anything that
-    was not exactly ``ppo`` fell through to the other branch -- and then failed somewhere
-    deeper, on a message about tensor shapes.
+    was not exactly ``ppo`` fell through to the other branch -- and then failed inside
+    Stable-Baselines3's loader, on a missing ``q_net`` attribute that named no algorithm.
     """
     algorithm = os.environ.get("RL_LANDER_ALGO", "ppo").lower()
     if algorithm not in ALGORITHMS:

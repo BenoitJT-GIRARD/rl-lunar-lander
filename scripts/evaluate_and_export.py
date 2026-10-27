@@ -51,6 +51,14 @@ def main() -> None:
         default=list(DEFAULT_SEEDS),
         help="evaluation seed grids; the first is the one whose episodes are exported",
     )
+    parser.add_argument(
+        "--allow-below-threshold",
+        action="store_true",
+        help=(
+            "exit with status 0 when a grid's mean reward is below the solved threshold; "
+            "the exports are written in either case"
+        ),
+    )
     args = parser.parse_args()
 
     if not args.model.exists():

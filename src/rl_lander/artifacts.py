@@ -46,6 +46,18 @@ CURVE_COLUMNS = ("timesteps", "ep_rew_mean", "ep_rew_std")
 #: What `scripts/aggregate_study.py` writes for the band across seeds.
 BAND_COLUMNS = ("timesteps", "median", "q25", "q75")
 
+#: What to do about a table that predates its schema, named after the step that writes it.
+#: The training curve is written during training and published by `scripts/publish_run.py`,
+#: so pointing at the evaluation exporter for it sent the reader to a script that never
+#: touches that file.
+EVALUATION_REMEDY = (
+    "It was probably written by an older version of `scripts/evaluate_and_export.py`; re-run it."
+)
+CURVES_REMEDY = (
+    "It was probably written by an older version of the training code; publish the run again "
+    "with `scripts/publish_run.py`."
+)
+
 
 def write_json(path: Path, payload: object) -> Path:
     """Write a published JSON artefact: two-space indent, LF, one final newline."""
@@ -58,11 +70,15 @@ def write_json(path: Path, payload: object) -> Path:
     return path
 
 
-def read_table(path: Path, required: tuple[str, ...]) -> tuple[pd.DataFrame | None, str | None]:
+def read_table(
+    path: Path, required: tuple[str, ...], *, remedy: str = EVALUATION_REMEDY
+) -> tuple[pd.DataFrame | None, str | None]:
     """Read a published CSV and check its columns.
 
     Returns ``(frame, problem)``: exactly one of the two is ``None``. The problem is a
     sentence meant to be shown to whoever opened the page, naming the file and what to run.
+    ``remedy`` is that last part for a file whose columns are out of date, and it depends on
+    which script writes the file.
     """
     if not path.exists():
         return None, f"`{path.name}` not found."
@@ -74,8 +90,5 @@ def read_table(path: Path, required: tuple[str, ...]) -> tuple[pd.DataFrame | No
         return None, f"`{path.name}` is empty."
     missing = [column for column in required if column not in frame.columns]
     if missing:
-        return None, (
-            f"`{path.name}` is missing {', '.join(missing)}. It was probably written by an "
-            "older version of `scripts/evaluate_and_export.py`; re-run it."
-        )
+        return None, f"`{path.name}` is missing {', '.join(missing)}. {remedy}"
     return frame, None

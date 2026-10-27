@@ -232,8 +232,8 @@ def test_the_headline_claim_holds_on_every_evaluation_seed(published_summary: di
     """The README says the policy solves the environment. This is that sentence, as a test.
 
     The claim is about the *mean* over 100 episodes, and it is checked on every seed grid
-    the exporter scored, and never on the exported one alone, which is the most
-    favourable of them.
+    the exporter scored, and never on the exported one alone. On the published export the
+    exported grid happens to be the least favourable of the six.
     """
     across = published_summary.get("across_seeds")
     if across is None:

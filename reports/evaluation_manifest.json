@@ -11,11 +11,13 @@
     31337
   ],
   "deterministic": true,
-  "evaluated_at": "2026-09-04T08:34:18+00:00",
-  "git_revision": "3307dc16cc8a",
+  "evaluated_at": "2026-10-27T20:34:53+00:00",
+  "git_revision": "15f576ed9be8",
   "versions": {
     "gymnasium": "1.0.0",
     "stable_baselines3": "2.4.0",
-    "numpy": "1.26.4"
+    "numpy": "1.26.4",
+    "torch": "2.13.0+cu126",
+    "Box2D": "2.3.10"
   }
 }

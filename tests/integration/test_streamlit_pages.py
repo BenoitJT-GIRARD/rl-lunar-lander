@@ -129,3 +129,23 @@ def test_the_dashboard_says_what_is_missing_and_does_not_raise(tmp_path: Path) -
     assert empty.error, "a page with nothing to read has to say so"
     assert "not found" in empty.error[0].value
     assert "train_lunarlander" in empty.error[0].value
+
+
+def test_an_outdated_training_curve_names_the_script_that_publishes_it(tmp_path: Path) -> None:
+    """The curve comes from training, through `scripts/publish_run.py`.
+
+    The message used to send the reader to `scripts/evaluate_and_export.py` for every table,
+    and that script never writes the training curve.
+    """
+    old_curve = tmp_path / "training_curves.csv"
+    old_curve.write_text("timesteps,ep_rew_mean\n1000,-150.0\n2000,-120.0\n", encoding="utf-8")
+    with pytest.MonkeyPatch.context() as patched:
+        patched.setattr("rl_lander.utils.TRAINING_CURVES_CSV", old_curve)
+        app = AppTest.from_file(str(DASHBOARD), default_timeout=TIMEOUT)
+        app.run()
+
+    assert not app.exception, [str(e) for e in app.exception]
+    message = next(info.value for info in app.info if "training_curves.csv" in info.value)
+    assert "ep_rew_std" in message
+    assert "publish_run.py" in message
+    assert "evaluate_and_export.py" not in message

@@ -27,8 +27,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/app/.venv/bin:$PATH"
 # pygame builds the replay frames through SDL, which looks for a display and aborts without
-# one. The image has no X server and never will: the frames are pixels in memory, and they
-# leave over HTTP.
+# one. The image has no X server. Neither service started from it draws frames: `/run`
+# returns actions and rewards, and the dashboard reads files.
 ENV SDL_VIDEODRIVER=dummy
 
 WORKDIR /app

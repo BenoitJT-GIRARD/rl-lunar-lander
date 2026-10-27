@@ -1,6 +1,6 @@
 """Promote one training run to the artefacts the repository publishes.
 
-Training writes to `models/<algo>/seed-<n>/`, one directory per run, none of them tracked.
+Training writes to `var/runs/<algo>/seed-<n>/`, one directory per run, none of them tracked.
 Exactly one run is the one the README quotes, the API serves and the dashboard plots, and
 this script is the step that says which. Nothing else in the pipeline writes to the
 published paths, so a figure in the README can always be traced to the run it came from.
@@ -66,8 +66,8 @@ def publish(run: Path) -> list[Path]:
     manifest = json.loads((run / "manifest.json").read_text(encoding="utf-8"))
     if manifest.get("best_is_final"):
         raise SystemExit(
-            f"'{run}' never improved on its starting policy, so its best.zip is just the "
-            "final state. Publishing it would put an untrained policy behind the README's "
+            f"'{run}' ended before its first evaluation, so its best.zip is just the final "
+            "state. Publishing it would put an untrained policy behind the README's "
             "figures. Train longer, or pass another run."
         )
 
@@ -94,7 +94,7 @@ def main() -> None:
     parser.add_argument(
         "--from-study",
         action="store_true",
-        help="pick the run nearest the median of data/seed_study.json",
+        help="pick the run nearest the median of reports/seed_study.json",
     )
     args = parser.parse_args()
 
