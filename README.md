@@ -257,19 +257,10 @@ been hiding: a PPO with an MLP policy should run on the CPU. A measurement confi
 second one showed that DQN trains faster on the GPU. Both measurements are in the comments
 beside the device fields of `training/hyperparameters.py`.
 
-### What was wrong before, and by how much
+### How the results are produced
 
-This repository used to report `262.2 ± 18.2`, taken from one training on the evaluation grid
-most favourable to its spread, its worst episode and its landing rate, as if the ± described the
-method. Re-reading the published material and rebuilding the study found the ten defects below.
-
-**The file called `best` held the last model.** `EvalCallback` saved its best checkpoint to
-`models/best_model.zip`, and `model.save(output)` then saved the state at the *end* of training
-under the name that was tracked and published. Both algorithms wrote to that one directory, and
-`--output` defaulted to the PPO path whatever the value of `--algo`.
-
-Both checkpoints are now kept, and `scripts/compare_checkpoints.py` measures what the defect
-cost on the exported grid of n = 100 episodes:
+**Both checkpoints are kept.** Each training saves its best checkpoint and its final state, and
+`scripts/compare_checkpoints.py` scores both on the exported grid of n = 100 episodes:
 
 <!-- source: reports/checkpoint_comparison.csv -->
 | Run | Checkpoint | n | mean_reward | landing_rate |
@@ -281,72 +272,42 @@ cost on the exported grid of n = 100 episodes:
 
 > **How to read it.** Two checkpoints per run, scored on the same hundred episodes. `best.zip`
 > is the checkpoint saved at the highest evaluation score seen during training, and `final.zip`
-> is the state left by the last training step. The gap between the two shows what publishing the
-> wrong one costs, and it is large on the DQN row.
+> is the state left by the last training step. The gap between the two is why the checkpoint to
+> publish is chosen explicitly, and it is large on the DQN row.
 
 <!-- source: reports/checkpoint_comparison.csv -->
 The final DQN checkpoint lands **0** of its n = 100 episodes, against **96** for its best
-checkpoint. Had DQN been the shipped algorithm, the published policy would never have landed.
-For PPO, the algorithm that was shipped, the same defect moved the mean by about six points in
-the other direction, in favour of the final checkpoint.
+checkpoint. For PPO, the shipped algorithm, the final checkpoint scores about six points above
+the best one.
 
-**Landing was read from the score.** `evaluate.py` set `landed = total_reward >= 200`, but 200
-is a threshold on the score. Gymnasium's documentation calls an episode scoring at least 200 a
-solution, and the repository's own criterion for solving the task is a mean of at least 200 over
-100 episodes. Neither tells whether the lander came to rest. The environment reports a landing
-directly, through the sign of the reward it gives on termination.
+**A landing is read from the environment.** The environment reports a landing through the sign
+of the reward it gives on termination, and the landing rate counts that signal. The score
+threshold of 200, which Gymnasium's documentation calls a solution, is reported separately.
 
 <!-- source: reports/seed_study.json -->
 On the shipped policy the two measures agree, with a landing rate of 0.97 and a threshold rate
-of 0.97 over n = 100 episodes, so the confusion went unnoticed. They differ on seed 44, which lands
-**0.98** of its episodes and reaches 200 on **0.96**.
+of 0.97 over n = 100 episodes. They differ on seed 44, which lands **0.98** of its episodes and
+reaches 200 on **0.96**.
 
-**Two official means, in the same file.** `evaluation_summary.json` contained 261.394 at its
-root and 262.218 under `metrics`, with standard deviations 44% apart. They came from two
-evaluation loops with different reset semantics, both were published, and the file did not say
-which one was the result.
+**One result per file.** Each export holds one evaluation loop, and the manifest described at the
+top of this section records the model, the seeds, the versions and the revision.
 
-**One evaluation grid, published as the performance.** The old export evaluated seed 2024 alone,
-without saying so. Its published standard deviation of 18.2 was computed with ddof = 0. Measured
-on six grids with ddof = 1, it becomes 18.3, the lowest of the six, against a median of 23.4. Its
-100% landing rate also belonged to that grid alone: the worst episode on the other grids was
-63.0, against the 222.5 on record.
+**Spread and worst episode across six grids.** Standard deviations are computed with ddof = 1,
+and the result section reports the mean and the worst episode on six evaluation grids.
 
-**The exports carried almost no provenance.** Apart from the file path of the model, they
-recorded no seed list, library versions or revision, so a reader could not re-run them. The
-manifest described at the top of this section now records the model, the seeds, the versions and
-the revision.
+**Fuel per engine.** Two counters, one for the main engine and one for the side engines, are
+columns of every exported episode.
 
-**The structure section described a tree that did not exist.** It listed directories the
-repository did not have and left out some that it did. Every path in the section below now
-exists in the repository.
+**Seeds as a source of variation.** The first table on this page compares trainings that differ
+only by their seed, with run means from 237.43 to 265.39.
 
-**`fuel_used` counted one engine in three.** It summed the main engine only, so a policy that
-hovered on its side thrusters looked economical. Two counters replaced it, one for the main
-engine and one for the side engines, and both are columns of every exported episode.
+**Measured hyper-parameter trials.** Each trial is trained and scored: `lr=1e-3` comes first and
+the baseline second.
 
-**One training run, published as the method.** The defects above concern how a single training
-was evaluated and published. The variation between two trainings that differ only by their seed,
-which is the one that matters in reinforcement learning, had not been measured. The first table
-on this page measures it: run means from 237.43 to 265.39, a 28-point range, where the old export
-gave ±18.2 as its only uncertainty.
+**A DQN baseline**, trained and scored at an equal budget, with its results above.
 
-**A hyper-parameter study that did not exist.** The notebook showed a table of four approximate
-figures, `~280`, `< 200`, `~270` and `~240`, and drew a conclusion from it. These numbers
-appeared nowhere else in the repository, and the TensorBoard logs cited as evidence are ignored
-by git. Once measured, every row turned out wrong and the order changed: the table put
-the baseline first and `lr=1e-3` last, and the measurement puts `lr=1e-3` first and the
-baseline second.
-
-**The DQN baseline was announced but missing.** `models/` was described as holding "best PPO /
-baseline DQN" and held only the PPO, while the notebook discussed the baseline as if it existed.
-The DQN is now trained and scored, and its results are published above.
-
-One more defect escaped every linter and warning. A slot descriptor, read as a fallback value,
-passed through the constructor of the hyper-parameters without an error and failed only once
-training had started, inside the Stable-Baselines3 training loop.
-`tests/unit/training/test_training_artifacts.py` now covers it and explains how the value
-should be read.
+`tests/unit/training/test_training_artifacts.py` checks how every hyper-parameter value is read
+before a training starts.
 
 ## Running it
 
@@ -430,27 +391,22 @@ exercises included.
 └── tests/                        # the published artefacts are among the assertions
 ```
 
-## What this does not prove
+## Scope
 
-**Five seeds is a small sample.** They show that the training seed matters, which justifies
-publishing a spread, but the 95% confidence interval they give on that spread is wide, roughly 8
-to 38 points. `docs/protocol.md` gives the narrower interval twenty seeds would give, and explains
-why the conclusion holds with five.
+**Five training seeds.** They show how much the seed matters, which is why a spread is published.
+`docs/protocol.md` gives the interval twenty seeds would give and explains why the conclusion
+holds with five.
 
-**One seed per hyper-parameter trial.** The trials check whether the notebook's old table was right, and they are not designed to find
-the best value of each parameter.
+**One seed per hyper-parameter trial.** The trials compare configurations at this budget.
 
-**One hundred evaluation episodes.** That is the sample size this repository fixed, and the
-across-grid table shows its limit: the mean is stable from one grid to another, and the worst
-episode varies widely. A landing autopilot would be judged on its worst case, which 100 episodes
-estimate poorly. Seed 44's worst episode scores −33.
+**One hundred evaluation episodes per grid,** the sample size this repository fixed. The mean is
+stable from one grid to another, and the across-grid table also reports the worst episode, which
+is what a landing autopilot would be judged on.
 
-**The main limit: the task is nearly saturated.** The shipped policy clears the threshold on
-every grid, with a landing rate between 0.97 and 1.00, so there is little room left for one
-configuration to do better than another. At this budget on this environment, the effect of the
-learning rate is about the size of the variation between seeds, and the `lr=1e-3` trial cannot
-be called an improvement. A harder setting, such as `enable_wind=True`, would make the differences
-between configurations easier to measure.
+**A nearly saturated task.** The shipped policy clears the threshold on every grid, with a landing
+rate between 0.97 and 1.00, and the effect of the learning rate is about the size of the variation
+between seeds. A harder setting, such as `enable_wind=True`, would separate configurations
+further.
 
 ## Licence and data
 
